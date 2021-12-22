@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="590da27a-eba3-4eaf-9be3-36edd5feef67" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="67c16834-8868-476b-b2d1-a8372c72971b" >
+		<http:request-connection host="choiceconsume-alekhya.us-e2.cloudhub.io" />
+	</http:request-config>
+	<flow name="consume-request-alekhyaFlow" doc:id="6cfbf024-72b9-4347-920e-e41c2ac230c8" >
+		<http:listener doc:name="/requestconsume" doc:id="deaa12fe-c7dc-4273-b11b-1c420ea39be9" config-ref="HTTP_Listener_config" path="/requestconsume"/>
+		<set-variable value="#[uuid()]" doc:name="CorrelationId" doc:id="0565508a-2722-40ba-9db3-44a98c226045" variableName="CorrelationId"/>
+		<logger level="INFO" doc:name="Logger" doc:id="faa264f0-e8d4-4f49-8c91-57dae0efa04f" message="CorrelationId- #[vars.CorrelationId]"/>
+		<http:request method="POST" doc:name="Request" doc:id="f6806bf9-4e60-45b7-a8f5-1a7f7967b73f" config-ref="HTTP_Request_configuration" path="/importwsdlcalculator">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	CorrelationId : vars.CorrelationId
+}]]]></http:headers>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="15fed946-c61a-4e62-88a3-34f169904ebd" message="#[payload]- #[vars.CorrelationId]"/>
+	</flow>
+</mule>
